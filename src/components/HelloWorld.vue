@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, Ref } from 'vue'
 import Test from './Test.vue'
 defineProps<{ msg: string }>()
 type Person = {
@@ -16,7 +16,7 @@ type Person = {
   }
   optional2?: string
 }
-const data = ref({
+const data: Ref<Person> = ref({
   name: 'John Doe',
   age: 30,
   nested: {
@@ -118,7 +118,7 @@ type Flatten2<T, O = never> = Writable<Cleanup<T>, O> extends infer U
     : U
   : never
 
-function genDynRef<T>() {
+function genDynRef<T>(data: Ref<T>) {
   return <K extends keyof Flatten2<T> & string>(path: K) => {
     return computed({
       get() {
@@ -148,7 +148,10 @@ watch(
   },
   { deep: true }
 )
-const a = genDynRef<Person>()('nested.fee.a')
+// 紐づけたいデータとパスを指定すれば、v-modelで双方向バインディングできるようにする汎関数
+const a = genDynRef<Person>(data)('nested.fee.a')
+
+// formFactory(source, bindinfPath, formLen, formType) -> formObject
 </script>
 
 <template>
